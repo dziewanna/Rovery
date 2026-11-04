@@ -75,6 +75,10 @@ button:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
 .tag{margin:0;font:700 max(14px,calc(var(--u)*3.3))/1.3 var(--f-body);max-width:26ch;text-wrap:balance;background:rgba(243,230,200,.88);padding:.4em .8em;border-radius:12px}
 .best{margin:0;font:700 max(11px,calc(var(--u)*2.2))/1.25 var(--f-type);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:rgba(243,230,200,.75);padding:.3em .6em;border-radius:6px}
 .t-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.lvl{display:flex;gap:4px;background:rgba(243,230,200,.9);padding:4px;border-radius:999px;border:2px solid var(--ink);box-shadow:2px 3px 0 var(--ink)}
+.lv{border:0;background:transparent;border-radius:999px;padding:9px 12px;font:700 max(12px,calc(var(--u)*2.5))/1 var(--f-type);text-transform:uppercase;letter-spacing:.04em;color:var(--ink)}
+.lv[aria-pressed="true"]{background:var(--ink);color:var(--mustard)}
+.lvdesc{margin:0;font:700 max(12px,calc(var(--u)*2.5))/1.3 var(--f-body);background:rgba(243,230,200,.8);padding:.25em .7em;border-radius:8px}
 .btn{border:3px solid var(--ink);background:var(--cream);color:var(--ink);border-radius:999px;padding:11px 22px;font:400 max(17px,calc(var(--u)*3.6))/1 var(--f-display);box-shadow:3px 4px 0 var(--ink)}
 .btn.primary{background:var(--rust);color:var(--cream)}
 .btn:active{transform:translate(2px,3px);box-shadow:1px 1px 0 var(--ink)}
@@ -169,6 +173,12 @@ button:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
         <p class="eyebrow"><span class="tape">Wielki Tour w etapach po pięć sekund</span></p>
         <h1 class="logo"><span>Peleton</span><span>Panika</span></h1>
         <p class="tag">Mikroetapy dla ludzi, którzy wiedzą, po której stronie usiąść na koło.</p>
+        <div class="lvl" role="group" aria-label="Poziom trudności">
+          <button class="lv" data-lv="easy" aria-pressed="true">Spacerkiem</button>
+          <button class="lv" data-lv="mid" aria-pressed="false">Peleton</button>
+          <button class="lv" data-lv="hard" aria-pressed="false">Wyścig</button>
+        </div>
+        <p class="lvdesc" id="lvDesc"></p>
         <div class="t-btns">
           <button class="btn primary" id="bStart">Start etapu</button>
           <button class="btn" id="bHelp">Jak grać</button>
@@ -225,7 +235,7 @@ button:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
       <li><b>Każdy etap trwa kilka sekund.</b> Najpierw komenda, po kolarsku. Potem od razu działasz.</li>
       <li><b>Na telefonie stukasz w scenę</b> albo w przyciski pod nią. Lewa połowa ekranu to lewo, prawa to prawo, a w etapach z jedną akcją działa stuknięcie gdziekolwiek.</li>
       <li><b>Masz 4 zapasowe dętki.</b> Każdy błąd to kapeć. Bez dętek wyścig się kończy.</li>
-      <li><b>Co trzy etapy peleton przyspiesza.</b> Po drodze trafiają się niespodzianki.</li>
+      <li><b>Wybierz poziom na starcie.</b> „Spacerkiem” to wolne tempo i 5 dętek, „Peleton” jest szybszy, a „Wyścig” to pełne tempo. Z czasem peleton przyspiesza, a po drodze trafiają się niespodzianki.</li>
       <li><b>Za punkty zdobywasz koszulki:</b> od czerwonej latarni aż po tęczę.</li>
     </ul>
     <p>Podpowiedzi są skromne. Kto jeździ, ten wie.</p>
@@ -920,7 +930,7 @@ GAMES.kolo={
     windsock(g,s.side);bikeComputer(g,436,770,[['MOC',Math.round(s.power)+' W'],['NA KOLE',s.power<272?'TAK':'NIE']]);
     if(s.flash>0){g.globalAlpha=Math.min(1,s.flash*2);txt(g,'Wiatr się zmienia!',300,300,40,{a:'center',c:P.mustard,stroke:P.ink,sw:8});g.globalAlpha=1;}},
   timeout(s){const tx=this.tx(s),dx=s.x-tx;
-    if(Math.abs(dx)<22)return ok(pick(['W cieniu jak kot pod samochodem. Moc spada o jedną trzecią.','Na kole jak na szynach. Ktoś inny łapie wiatr.','Idealny wachlarz. Rywal z przodu pracuje za dwoje.']));
+    if(Math.abs(dx)<22*DF().tol)return ok(pick(['W cieniu jak kot pod samochodem. Moc spada o jedną trzecią.','Na kole jak na szynach. Ktoś inny łapie wiatr.','Idealny wachlarz. Rywal z przodu pracuje za dwoje.']));
     if(s.side===0)return bad('Wiatr prosto w twarz. Wtedy siada się dokładnie za kołem, nie obok.');
     const w=s.side>0?'z lewej':'z prawej';if((s.x-s.lead.x)*s.side<8)return bad(`Wiatr ${w}, a Ty po nawietrznej. Pracujesz za całą grupę.`);
     if(dx*s.side>0)return bad('Za daleko w bok. To już rynna, nie koło. Wiatr hula.');return bad('Prawie! Jeszcze pół koła w stronę zawietrzną.');}
@@ -946,7 +956,7 @@ GAMES.zakret={
 /* BIDON */
 GAMES.bidon={
   cmd:'Bidon do strefy!',hint:'Pusty bidon wyrzucasz tylko w strefie zrzutu',pad:{action:'rzuć'},dur:4.2,HX:328,
-  init(){const sp=320,z0=this.HX+sp*rand(1.75,2.05);return{x:0,sp,z0,z1:z0+sp*1.05,fan:this.HX+sp*rand(.85,1.05),pre:this.HX+sp*.3,crank:0,thrown:null,b:null};},
+  init(){const sp=320,z0=this.HX+sp*rand(1.75,2.05);return{x:0,sp,z0,z1:z0+sp*1.05*DF().tol,fan:this.HX+sp*rand(.85,1.05),pre:this.HX+sp*.3,crank:0,thrown:null,b:null};},
   update(s,dt){s.x+=s.sp*dt;s.crank+=dt*10;if(s.b){s.b.x+=s.b.vx*dt-s.sp*dt*.6;s.b.y+=s.b.vy*dt;s.b.vy+=1000*dt;s.b.r+=dt*12;if(s.b.y>628){s.b.y=628;s.b.vy*=-.35;s.b.vx*=.5;}}},
   press(s,b){if(b!=='action'||s.thrown!==null||s.res)return;const wx=s.x+this.HX;s.thrown=wx;s.b={x:this.HX,y:610,vx:-30,vy:-340,r:0};sfx.whoosh();
     if(wx>=s.z0&&wx<=s.z1)s.res=ok(pick(['W strefie zrzutu, zgodnie z przepisami UCI. Matka Natura klaszcze.','Rzut do strefy jak z podręcznika. A dzieciak i tak go złapał.']));
@@ -977,7 +987,7 @@ GAMES.odepnij={
   init(){return{v0:rand(22,28),v:24,T:rand(2.8,3.2),un:false,uT:0,side:pick([-1,1]),stopped:false,topple:false,tT:0,sc:0,clapped:false};},
   update(s,dt){if(!s.stopped){s.v=s.v0*Math.pow(Math.max(0,1-S.t/s.T),1.15);if(s.v<=.05){s.v=0;s.stopped=true;if(!s.un&&!s.res){s.res=bad('Stop z wpiętymi butami. Powolny upadek na oczach całej kawiarni. Brawa!');s.hold=1.7;s.topple=true;}}}
     s.sc+=s.v*dt*.12;if(s.un)s.uT=Math.min(1,s.uT+dt*4);if(s.topple){s.tT=Math.min(1,s.tT+dt*1.4);if(s.tT>.85&&!s.clapped){s.clapped=true;sfx.clap();}}},
-  press(s){if(s.un||s.res)return;s.un=true;const v=Math.round(s.v);s.res=s.v>12?bad(`Wypięcie przy ${v} km/h? Za wcześnie. Dojeżdżasz z nogą w powietrzu jak z flagą.`):ok(`Wypięcie przy ${v} km/h. Stopa na ziemi, godność nienaruszona.`);s.hold=1;},
+  press(s){if(s.un||s.res)return;s.un=true;const v=Math.round(s.v);s.res=s.v>12*Math.min(DF().tol,1.4)?bad(`Wypięcie przy ${v} km/h? Za wcześnie. Dojeżdżasz z nogą w powietrzu jak z flagą.`):ok(`Wypięcie przy ${v} km/h. Stopa na ziemi, godność nienaruszona.`);s.hold=1;},
   timeout(){return bad('Coś poszło nie tak przy kawiarni.');},
   draw(g,s){const k=1-s.v/s.v0;rearBG(g,0,s.sc);const sz=1.2+(1-k)*7,r=roadAt(sz,0);g.fillStyle='#F3E6C8';g.fillRect(r.cx-r.hw,r.y-14/sz,r.hw*2,28/sz);
     drawCafe(g,k,s.clapped);
@@ -1000,7 +1010,7 @@ GAMES.rzut={
   init(){const arrive=rand(2.4,2.9),base=140+85*1.75,line0=760,ls=(line0-base)/arrive;return{arrive,base,line0,ls,lx:line0,thr:-1,crank:0,done:false,photoT:0,sc:0,my:0,rv:0,rArr:(line0-(base+34))/ls};},
   tips(s){return[140+(85+26*s.my/28)*1.75,150+(85+23.4*s.rv/15)*1.6];},
   off(tau){if(tau<0)return 0;if(tau<.12)return 28*easeOut(tau/.12);if(tau<.36)return 28;if(tau<.58)return 28*(1-easeIO((tau-.36)/.22));return 0;},
-  update(s,dt){if(s.done){s.photoT+=dt;return;}s.crank+=dt*13;s.sc+=dt*s.ls;s.lx=s.line0-s.ls*S.t;s.my=this.off(s.thr<0?-1:S.t-s.thr);s.rv=15*smooth(s.rArr-.25,s.rArr-.08,S.t);
+  update(s,dt){if(s.done){s.photoT+=dt;return;}s.crank+=dt*13;s.sc+=dt*s.ls;s.lx=s.line0-s.ls*S.t;s.my=this.off(s.thr<0?-1:S.t-s.thr);s.rv=15*smooth(s.rArr-.25,s.rArr-.08,S.t)/Math.sqrt(DF().tol);
     const[myTip,rvTip]=this.tips(s);if(s.lx<=Math.max(myTip,rvTip)){s.done=true;s.lx=Math.max(myTip,rvTip);const win=myTip>rvTip,cm=Math.max(1,Math.round(Math.abs(myTip-rvTip)/1.7));s.cm=cm;s.win=win;
       if(win){s.res=ok(`Rzut idealny! Wygrana o ${cm} cm. Fotokomórka nie kłamie.`);confetti(60);}else if(s.thr<0)s.res=bad(`Bez rzutu na kreskę? Rywal wygrywa o ${cm} cm.`);else if(S.t-s.thr>.4)s.res=bad(`Rzut za wcześnie. Na kresce już po wszystkim, rywal wygrywa o ${cm} cm.`);else s.res=bad(`Rzut za późno. Kreska była szybsza, rywal o ${cm} cm.`);s.hold=1.5;}},
   press(s,b){if(b!=='action'||s.thr>=0||s.done)return;s.thr=S.t;sfx.whoosh();},
@@ -1022,7 +1032,7 @@ GAMES.pompka={
   cmd:'Pompuj!',hint:'Napompuj do właściwego ciśnienia. AKCJA wiele razy',pad:{action:'pompuj'},dur:4.4,
   init(){const t=pick(TIRES),p=rand(.4,.9),mid=(t.lo+t.hi)/2;return{t,p,n:p,inc:(mid-p)/8,pl:0,burst:false,flash:0};},
   ang(p){return Math.PI*.75+p/11*Math.PI*1.5;},
-  press(s,b){if(s.res||(b!=='action'&&b!=='up'&&b!=='down'))return;s.p+=s.inc*rand(.9,1.1);s.pl=1;sfx.pump();if(s.p>s.t.hi+2.2){s.burst=true;s.flash=1;sfx.bum();s.res=bad(s.t.hookless?'Hookless powyżej 5 bar… BUM! Opona zeszła z felgi z hukiem.':`${fmt(s.p)} bar. Pompka mówi „jeszcze”, opona mówi BUM.`);s.hold=1.2;}},
+  press(s,b){if(s.res||(b!=='action'&&b!=='up'&&b!=='down'))return;s.p+=s.inc*rand(.9,1.1);s.pl=1;sfx.pump();if(s.p>s.t.hi+2.2*DF().tol){s.burst=true;s.flash=1;sfx.bum();s.res=bad(s.t.hookless?'Hookless powyżej 5 bar… BUM! Opona zeszła z felgi z hukiem.':`${fmt(s.p)} bar. Pompka mówi „jeszcze”, opona mówi BUM.`);s.hold=1.2;}},
   update(s,dt){s.n+=(s.p-s.n)*Math.min(1,dt*12);s.pl=Math.max(0,s.pl-dt*5);s.flash=Math.max(0,s.flash-dt*2);if(s.burst)s.p=Math.max(0,s.p-dt*14);},
   timeout(s){const p=s.p,t=s.t,r=` (dobrze: ${fmt(t.lo)}–${fmt(t.hi)} bar)`;if(p>=t.lo&&p<=t.hi)return ok(`${fmt(p)} bar, w punkt. Opona się klei, opory toczenia nisko.`);if(p<t.lo)return bad(`Tylko ${fmt(p)} bar. Opona faluje w zakrętach jak galareta.`+r);if(t.hookless)return bad(`${fmt(p)} bar na hookless? Limit to 5 bar, opona zaraz zejdzie z felgi.`);return bad(`${fmt(p)} bar? Twardo jak w 2005. Dziś szybciej jeździ się na niższym ciśnieniu.`+r);},
   draw(g,s){g.drawImage(BGL.wall.c,0,0,W,H);
@@ -1056,7 +1066,7 @@ GAMES.siedz={
   cmd:'Siedź na kole!',hint:'Rywal macha łokciem. Nie daj się sprowokować. Słuchaj radia',pad:{left:'',up:'',down:'',right:'',action:'atak'},all:true,dur:4.4,
   init(){const attack=Math.random()<.5;return{attack,atkT:rand(2.3,3.2),called:false,callT:0,crank:0,flicks:[.35,1.25,2.15,3.05].map(t=>t+rand(-.1,.1)),lines:shuffle(['Twoja zmiana!','Halo? Łokieć!','No weź…','Ja też mam nogi!','Teraz Ty!','Pociągnij trochę!']),out:0,go:0,w:168};},
   update(s,dt){s.crank+=dt*9.5;if(s.res){if(s.res.ok)s.go=Math.min(1,s.go+dt*2.2);else s.out=Math.min(1,s.out+dt*3);return;}
-    if(s.attack&&!s.called&&S.t>=s.atkT){s.called=true;s.callT=S.t;sfx.radio();}if(s.called&&S.t>s.callT+1.0){s.res=bad('Radio krzyczy ATAK, a Ty dalej na kole. Dyrektor rzuca słuchawką.');s.hold=1;}s.w=Math.round(166+Math.sin(S.clock*5)*6);},
+    if(s.attack&&!s.called&&S.t>=s.atkT){s.called=true;s.callT=S.t;sfx.radio();}if(s.called&&S.t>s.callT+1.0*DF().tol){s.res=bad('Radio krzyczy ATAK, a Ty dalej na kole. Dyrektor rzuca słuchawką.');s.hold=1;}s.w=Math.round(166+Math.sin(S.clock*5)*6);},
   press(s){if(s.res)return;if(!s.called){s.res=bad('Wychodzisz na zmianę. Pan z łokciem odpoczywa, a sprinter z tyłu przesyła buziaka.');s.hold=1;}else{s.res=ok(`Atak ${Math.round((S.t-s.callT)/S.speed*1000)} ms po komendzie! Rywal został z łokciem w powietrzu.`);s.hold=1;}},
   timeout(s){return s.attack?bad('Radio krzyczy ATAK, a Ty dalej na kole.'):ok('Żelazne nerwy. Łokieć macha, a Ty siedzisz na kole jak mistrz.');},
   draw(g,s){rearBG(g,s.out*.3,S.clock*6);let f=0,side=1,li=0;s.flicks.forEach((t,i)=>{const d=S.t-t;if(d>0&&d<.5){f=Math.sin(d/.5*Math.PI);side=i%2?-1:1;}if(S.t>t)li=i;});if(s.called||s.res)f=0;
@@ -1099,7 +1109,7 @@ GAMES.bufet={
   cmd:'Bufet!',hint:'Złap musette od masażysty w turkusowej kurtce',pad:{action:'łap'},dur:4.6,HX:282,
   init(){const others=shuffle(['rival','sausage','phone']),mine=1+Math.floor(Math.random()*3),ps=[];let wx=540;for(let i=0;i<4;i++){ps.push({x:wx,type:i===mine?'mine':others.pop()||'rival',taken:false});wx+=rand(250,300);}return{x:0,sp:330,ps,arm:0,got:null,crank:0,miss:0};},
   update(s,dt){s.x+=s.sp*dt;s.crank+=dt*10;s.arm=Math.max(0,s.arm-dt*3.5);s.miss=Math.max(0,s.miss-dt*2);},
-  press(s,b){if(b!=='action'||s.res||s.arm>.3)return;s.arm=1;sfx.grab();const hit=s.ps.find(p=>!p.taken&&Math.abs((p.x-s.x+81)-this.HX)<36);if(!hit){s.miss=1;return;}hit.taken=true;s.got=hit.type;
+  press(s,b){if(b!=='action'||s.res||s.arm>.3)return;s.arm=1;sfx.grab();const hit=s.ps.find(p=>!p.taken&&Math.abs((p.x-s.x+81)-this.HX)<36*DF().tol);if(!hit){s.miss=1;return;}hit.taken=true;s.got=hit.type;
     const m={mine:ok(pick(['Musette w pełnym pędzie! W środku żele, ryżowe ciastka i liścik od mamy.','Złapane z gracją. Masażysta dostaje piątkę, Ty dostajesz kalorie.'])),rival:bad('To masażysta innej ekipy! Jego kanapki, Twój wstyd.'),sausage:bad('Kiełbasa z grilla zamiast żeli. Kalorie się zgadzają, regulamin nie.'),phone:bad('Zabierasz kibicowi telefon. Za to zdjęcie wyszło świetne.')};s.res=m[hit.type];s.hold=1;},
   timeout(){return bad('Bufet minął, a Ty bez musette. Za 30 km odcina prąd.');},
   draw(g,s){sideBG(g,s.x);
@@ -1113,7 +1123,7 @@ GAMES.bufet={
 const OBS_SIZE={pothole:[50,30],dog:[70,24],boar:[90,44],fan:[50,34],banana:[34,72],babcia:[46,40]};
 GAMES.dzik={
   cmd:'Dziki na trasie!',hint:'Omijaj wszystko, co wbiega na drogę: ◀ ▶',pad:{left:'w lewo',right:'w prawo'},dur:5,
-  init(){const sched=[{t:.1,type:'pothole'},{t:.8,type:pick(['dog','fan'])},{t:1.6,type:'boar'},{t:2.7,type:pick(['pothole','banana','babcia','dog'])}];return{x:300,sc:0,obs:[],sched,hit:null,spin:0,crank:0};},
+  init(){const sched=[{t:.1,type:'pothole'},{t:.8,type:pick(['dog','fan'])},{t:1.6,type:'boar'},{t:2.7,type:pick(['pothole','banana','babcia','dog'])}];if(DF().tol>=1.5)sched.splice(1,1);return{x:300,sc:0,obs:[],sched,hit:null,spin:0,crank:0};},
   spawn(s,type){const o={type,y:-110,dir:pick([-1,1]),vx:0};
     if(type==='pothole'||type==='banana')o.x=clamp(s.x+rand(-60,60),190,410);
     if(type==='dog'){o.x=o.dir>0?80:520;o.vx=o.dir*200;}if(type==='boar'){o.x=o.dir>0?rand(40,90):rand(510,560);o.vx=o.dir*95;}if(type==='babcia'){o.x=o.dir>0?140:460;o.vx=o.dir*75;}
@@ -1172,7 +1182,12 @@ GAMES.radio={
 
 /* ---------- stan gry ---------- */
 const held={left:false,right:false,up:false,down:false,action:false};
-const S={mode:'title',stage:0,score:0,lives:4,speed:1,prevSpeed:1,bonus:0,mult:1,bag:[],lastId:null,game:null,gs:null,t:0,phaseT:0,introDur:2,resultDur:2,eventDur:4,clock:0,shake:0,paused:false,got:new Set(),lastEvent:0,best:0,bestRank:'',bib:71,fx:[],dust:[],forced:null,profile:null};
+const S={mode:'title',diff:'easy',stage:0,score:0,lives:4,speed:1,prevSpeed:1,bonus:0,mult:1,bag:[],lastId:null,game:null,gs:null,t:0,phaseT:0,introDur:2,resultDur:2,eventDur:4,clock:0,shake:0,paused:false,got:new Set(),lastEvent:0,best:0,bestRank:'',bib:71,fx:[],dust:[],forced:null,profile:null};
+const DIFF={
+  easy:{name:'Spacerkiem',desc:'Wolne tempo, 5 dętek, łagodne okna na reakcję.',base:.66,ramp:.04,every:4,cap:1.15,lives:5,intro:1.5,res:1.3,tol:1.5},
+  mid:{name:'Peleton',desc:'Średnie tempo, 4 dętki.',base:.82,ramp:.06,every:3,cap:1.5,lives:4,intro:1.25,res:1.15,tol:1.25},
+  hard:{name:'Wyścig',desc:'Pełne tempo wyścigu, 4 dętki. Bez litości.',base:1,ramp:.09,every:3,cap:2,lives:4,intro:1,res:1,tol:1}};
+const DF=()=>DIFF[S.diff]||DIFF.easy;
 const ORDER=['kolo','zakret','bidon','odepnij','rzut','pompka','siedz','bieg','bufet','dzik','radio'];
 const COMM=['„Tu się wyścigu nie wygra, ale można go przegrać.”','„Widać, że ma dziś dobre nogi.”','„Peleton się nie spieszy, ucieczka ma cztery minuty.”','„Kolarstwo to sport drużynowy, w którym wygrywa jeden.”','„Teraz zaczyna się prawdziwe ściganie.”','„Ten moment może wszystko zmienić.”','„Wiatr dziś będzie kluczowy.”','„Kolarze to pokerzyści, nie pokażą zmęczenia.”','„Jeszcze nic nie jest przesądzone.”','„Piękne obrazki z helikoptera. A tam zamek z XII wieku.”','„Tempo w peletonie bardzo wysokie.”','„Ekipa ustawia pociąg dla swojego sprintera.”','„Te łydki widać z helikoptera.”'];
 const OKW=['Brawo!','Czysto!','Jest!','Pięknie!','Sztos!','Klasa!'];
@@ -1218,12 +1233,12 @@ function fit(){
 if(window.ResizeObserver)new ResizeObserver(fit).observe(wrap);window.addEventListener('resize',fit);
 
 /* ---------- przebieg gry ---------- */
-function startRun(){A();Object.assign(S,{stage:0,score:0,lives:4,bonus:0,mult:1,got:new Set(),lastEvent:0,bag:[],lastId:null,bib:11+Math.floor(Math.random()*208),paused:false,prevSpeed:1,fx:[]});el.title.hidden=true;el.over.hidden=true;el.pauseOv.hidden=true;renderHUD();nextStage();}
+function startRun(){A();Object.assign(S,{stage:0,score:0,lives:DF().lives,bonus:0,mult:1,got:new Set(),lastEvent:0,bag:[],lastId:null,bib:11+Math.floor(Math.random()*208),paused:false,prevSpeed:1,fx:[]});el.title.hidden=true;el.over.hidden=true;el.pauseOv.hidden=true;renderHUD();nextStage();}
 function nextGameId(){if(S.forced)return S.forced;if(!S.bag.length){S.bag=shuffle(ORDER.slice());if(S.bag[S.bag.length-1]===S.lastId){const t=S.bag[0];S.bag[0]=S.bag[S.bag.length-1];S.bag[S.bag.length-1]=t;}}return S.bag.pop();}
 function nextStage(){
-  S.stage++;S.prevSpeed=S.speed;S.speed=clamp(1+.09*Math.floor((S.stage-1)/3)+S.bonus,.9,2);
+  S.stage++;S.prevSpeed=S.speed;const d=DF();S.speed=clamp(d.base+d.ramp*Math.floor((S.stage-1)/d.every)+S.bonus,.55,d.cap+Math.max(0,S.bonus));
   const id=nextGameId();S.lastId=id;S.game=GAMES[id];S.gs=S.game.init();S.gs.res=null;S.gs.resAt=null;S.t=0;
-  S.profile=makeProfile(Math.floor(Math.random()*1e9));S.mode='intro';S.phaseT=0;S.introDur=S.stage===1?2.8:clamp(2.1/Math.sqrt(S.speed),1.5,2.1);
+  S.profile=makeProfile(Math.floor(Math.random()*1e9));S.mode='intro';S.phaseT=0;S.introDur=(S.stage===1?2.8:clamp(2.1/Math.sqrt(S.speed),1.5,2.1))*d.intro;
   el.bStage.textContent=`Etap ${S.stage} · ${S.profile.km} km · ${S.profile.name}`+(S.mult>1?' · premia ×2':'');el.bSpeed.hidden=!(S.stage>1&&S.speed>S.prevSpeed+.01);
   el.bCmd.textContent=S.gs.cmd||S.game.cmd;el.bHint.textContent=S.gs.hint||S.game.hint;el.bComm.textContent='Komentator: '+pick(COMM);
   el.banner.classList.remove('go');void el.banner.offsetWidth;el.banner.classList.add('go');el.banner.hidden=false;
@@ -1232,7 +1247,7 @@ function nextStage(){
 function onDecided(res){if(res.ok)sfx.bell();else{sfx.hiss();if(!RM)S.shake=.6;}}
 function finishStage(res){S.mode='result';S.phaseT=0;el.banner.hidden=true;const m=S.mult;S.mult=1;if(res.ok)S.score+=m;else S.lives--;
   el.rWord.textContent=res.ok?pick(OKW):'Kapeć!';el.rMsg.textContent=res.msg;el.rSub.textContent=res.ok?`+${m} pkt`:(S.lives===1?'−1 dętka · ostatnia zapasowa!':S.lives<=0?'Koniec dętek':'−1 dętka');
-  el.result.className='ov result '+(res.ok?'good':'fail');void el.result.offsetWidth;el.result.classList.add('show');el.result.hidden=false;S.resultDur=res.ok?2.0:2.8;renderHUD();}
+  el.result.className='ov result '+(res.ok?'good':'fail');void el.result.offsetWidth;el.result.classList.add('show');el.result.hidden=false;S.resultDur=(res.ok?2.0:2.8)*DF().res;renderHUD();}
 function afterResult(){el.result.hidden=true;if(S.lives<=0)return gameOver();
   const m=MILES.find(x=>S.score>=x.at&&!S.got.has(x.at));if(m){S.got.add(m.at);if(m.fx)m.fx();confetti(90);sfx.fanfare();return showCard('Nowa koszulka',m.t,m.d,c=>drawJersey(c,150,156,230,m.j),4.2);}
   if(S.stage>=3&&S.stage-S.lastEvent>=4&&Math.random()<.4){const pool=EVENTS.filter(e=>!e.cond||e.cond());if(pool.length){const ev=pick(pool);S.lastEvent=S.stage;if(ev.fx)ev.fx();if(ev.snd)sfx[ev.snd]();renderHUD();return showCard(ev.tag,ev.t,ev.d,c=>drawIcon(c,ev.id),3.8);}}
@@ -1240,7 +1255,7 @@ function afterResult(){el.result.hidden=true;if(S.lives<=0)return gameOver();
 function showCard(tag,title,text,paint,dur){S.mode='event';S.phaseT=0;S.eventDur=dur;el.banner.hidden=true;el.result.hidden=true;el.eTag.textContent=tag;el.eTitle.textContent=title;el.eText.textContent=text;const c=el.evCv.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,300,300);paint(c);el.event.hidden=false;clearPad();}
 function closeEvent(){el.event.hidden=true;if(S.lives<=0)gameOver();else nextStage();}
 function gameOver(){S.mode='over';clearPad();const r=rankFor(S.score);if(S.score>S.best){S.best=S.score;S.bestRank=r.name;store('peletonPanika.best',String(S.best));store('peletonPanika.bestRank',r.name);}
-  el.oRank.textContent=r.name;el.oDesc.textContent=r.d;const st=S.stage;el.oStats.textContent=`${S.score} pkt · ${st} ${st===1?'etap':(st%10>=2&&st%10<=4&&(st%100<12||st%100>14))?'etapy':'etapów'} · rekord ${S.best}`;
+  el.oRank.textContent=r.name;el.oDesc.textContent=r.d;const st=S.stage;el.oStats.textContent=`${S.score} pkt · ${st} ${st===1?'etap':(st%10>=2&&st%10<=4&&(st%100<12||st%100>14))?'etapy':'etapów'} · rekord ${S.best} · ${DF().name}`;
   const c=el.oJersey.getContext('2d');c.setTransform(1,0,0,1,0,0);c.clearRect(0,0,300,300);drawJersey(c,150,156,240,r.j);el.oCopied.hidden=true;el.over.hidden=false;renderBest();sfx.fanfare();}
 function confetti(n){if(RM)n=Math.min(n,12);for(let i=0;i<n;i++)S.fx.push({x:rand(60,540),y:rand(-60,0),vx:rand(-80,80),vy:rand(80,280),r:rand(0,TAU),vr:rand(-8,8),c:pick([P.rust,P.teal,P.mustard,P.cream,P.olive]),l:rand(2,3)});}
 function pause(on){if(S.mode==='title'||S.mode==='over')return;S.paused=on;el.pauseOv.hidden=!on;}
@@ -1315,18 +1330,21 @@ function closeHelp(){el.help.hidden=true;if(helpReturn&&helpReturn.focus)helpRet
 $('bStart').addEventListener('click',startRun);$('bAgain').addEventListener('click',startRun);$('bHelp').addEventListener('click',openHelp);$('bHelpClose').addEventListener('click',closeHelp);
 el.help.addEventListener('click',e=>{if(e.target===el.help)closeHelp();});$('bSound').addEventListener('click',toggleSound);$('bPause').addEventListener('click',()=>pause(!S.paused));$('bResume').addEventListener('click',()=>pause(false));
 $('bQuit').addEventListener('click',()=>{S.paused=false;el.pauseOv.hidden=true;el.banner.hidden=true;el.result.hidden=true;el.event.hidden=true;S.mode='title';clearPad();el.title.hidden=false;renderBest();});
+function setLevel(k){if(!DIFF[k])k='easy';S.diff=k;document.querySelectorAll('.lv').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lv===k)));$('lvDesc').textContent=DIFF[k].desc;store('peletonPanika.level',k);}
+document.querySelectorAll('.lv').forEach(b=>b.addEventListener('click',()=>{A();setLevel(b.dataset.lv);sfx.tick();}));
 $('eBtn').addEventListener('click',()=>{if(S.mode==='event')closeEvent();});
-$('bShare').addEventListener('click',()=>{const r=rankFor(S.score),t=`Peleton Panika: ${S.score} pkt, ${r.name}. Dasz radę lepiej?`;const done=m=>{el.oCopied.textContent=m;el.oCopied.hidden=false;};try{navigator.clipboard.writeText(t).then(()=>done('Skopiowane do schowka.'),()=>done(t));}catch(e){done(t);}});
+$('bShare').addEventListener('click',()=>{const r=rankFor(S.score),t=`Peleton Panika (${DF().name}): ${S.score} pkt, ${r.name}. Dasz radę lepiej?`;const done=m=>{el.oCopied.textContent=m;el.oCopied.hidden=false;};try{navigator.clipboard.writeText(t).then(()=>done('Skopiowane do schowka.'),()=>done(t));}catch(e){done(t);}});
 
 /* ---------- start ---------- */
 function boot(data){
   data=data||{};S.best=Number(data.best!=null?data.best:store('peletonPanika.best'))||0;S.bestRank=data.bestRank||store('peletonPanika.bestRank')||'';
   const snd=data.sound!=null?data.sound:store('peletonPanika.sound');if(snd==='0'||snd===false){AU.on=false;$('bSound').setAttribute('aria-pressed','false');}
+  setLevel(data.level||store('peletonPanika.level')||'easy');
   buildBG();renderBest();renderHUD();fit();requestAnimationFrame(frame);
   if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load(`40px ${FD}`),document.fonts.load(`700 20px ${FT}`)]).then(()=>buildBG()).catch(()=>{});}
 }
 const HOT=window.claude&&window.claude.hot;
-try{if(HOT&&typeof HOT.snapshot==='function')HOT.snapshot(()=>({best:S.best,bestRank:S.bestRank,sound:AU.on?'1':'0'}));}catch(e){}
+try{if(HOT&&typeof HOT.snapshot==='function')HOT.snapshot(()=>({best:S.best,bestRank:S.bestRank,sound:AU.on?'1':'0',level:S.diff}));}catch(e){}
 if(HOT&&typeof HOT.ready==='function')HOT.ready(boot);else boot(HOT&&HOT.data);
 window.__pp={S,GAMES,force(id){S.forced=id;}};
 </script>

@@ -30,6 +30,14 @@ Wszystko rysuje kod na canvasie, bez plików graficznych.
 
 Po drodze trafiają się niespodzianki (wóz techniczny, kontrola skarpetek, lotna premia ×2, dzwonki krowie), a za punkty wpadają koszulki: biała, w grochy, zielona, żółta i tęczowa.
 
+## Poziomy
+
+- **Spacerkiem** (domyślny): wolne tempo, 5 dętek, łagodniejsze okna na reakcję.
+- **Peleton**: średnie tempo, 4 dętki.
+- **Wyścig**: pełne tempo, 4 dętki.
+
+Gra zapamiętuje wybrany poziom.
+
 ## Sterowanie
 
 - Klawiatura: strzałki albo WASD, spacja = akcja, P = pauza, M = dźwięk.
