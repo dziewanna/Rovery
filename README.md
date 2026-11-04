@@ -2,7 +2,11 @@
 
 Gra przeglądarkowa dla ludzi, którzy naprawdę znają się na kolarstwie. Wielki Tour złożony z mikroetapów po kilka sekund: komenda po kolarsku, szybka reakcja, kolejny etap.
 
-Wystarczy otworzyć `index.html` w przeglądarce. Nie trzeba niczego instalować.
+Wystarczy otworzyć `index.html` w przeglądarce. Nie trzeba niczego instalować. Gra jest robiona przede wszystkim pod telefon, w pionie.
+
+## Styl
+
+Malowana animacja w duchu francuskiej karykatury lat 50.: ciepła sepia, akwarelowe tła, tuszowy kontur, który lekko „drga” jak w ręcznie rysowanym filmie, ziarno taśmy i winieta. Kolarze mają drobne torsy, długie nosy i ogromne, ogolone, lśniące łydki. Rowery są dopieszczone: malowana rama w przejściu kolorów, opony z jasnym bokiem, głębokie obręcze, zębatki z zębami, przesuwający się łańcuch, owijka, buty z pokrętłem, kaski z wentylacją i połyskiem. Wszystko rysuje kod na canvasie, bez plików graficznych.
 
 ## Etapy
 
@@ -17,7 +21,7 @@ Wystarczy otworzyć `index.html` w przeglądarce. Nie trzeba niczego instalować
 | **SIEDŹ NA KOLE!** | Rywal macha łokciem, a Ty nie wychodzisz na zmianę. Chyba że radio krzyknie „ATAK!”. |
 | **PODJAZD / ŚCIANA X%!** | Przełożenie do kadencji 80–100 rpm. Prędkość liczona z prawdziwej fizyki dla 300 W. |
 | **BUFET!** | Musette tylko od swojego masażysty. Nie od kibica z kiełbasą. |
-| **DZIKI NA TRASIE!** | Slalom między dziurami, psem, kibicami i rodziną dzików. |
+| **DZIKI NA TRASIE!** | Slalom między dziurami, jamnikiem, kibicami, babcią z grzybami i rodziną dzików. |
 | **RADIO Z WOZU!** | Pytanie od dyrektora sportowego: koszulki, klasyki, przepisy, sprzęt. |
 
 Po drodze trafiają się niespodzianki (wóz techniczny, kontrola skarpetek, lotna premia ×2, dzwonki krowie), a za punkty wpadają koszulki: biała, w grochy, zielona, żółta i tęczowa.
@@ -25,4 +29,4 @@ Po drodze trafiają się niespodzianki (wóz techniczny, kontrola skarpetek, lot
 ## Sterowanie
 
 - Klawiatura: strzałki albo WASD, spacja = akcja, P = pauza, M = dźwięk.
-- Telefon: przyciski pod sceną.
+- Telefon: stukanie w scenę (lewa połowa = lewo, prawa = prawo, w etapach z jedną akcją działa stuknięcie gdziekolwiek) albo przyciski pod sceną.
