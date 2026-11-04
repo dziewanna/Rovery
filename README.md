@@ -1,6 +1,6 @@
 # Peleton Panika
 
-Gra przeglądarkowa dla ludzi, którzy naprawdę znają się na kolarstwie. Wielki Tour złożony z mikroetapów po kilka sekund: komenda po kolarsku, szybka reakcja, kolejny etap.
+Gra przeglądarkowa dla ludzi, którzy naprawdę znają się na kolarstwie. Wielki Tour złożony z 21 rodzajów mikroetapów po kilka sekund: komenda po kolarsku, szybka reakcja, kolejny etap.
 
 Wystarczy otworzyć `index.html` w przeglądarce. Nie trzeba niczego instalować. Gra jest robiona przede wszystkim pod telefon, w pionie.
 
@@ -27,8 +27,18 @@ Wszystko rysuje kod na canvasie, bez plików graficznych.
 | **BUFET!** | Musette tylko od swojego masażysty. Nie od kibica z kiełbasą. |
 | **DZIKI NA TRASIE!** | Slalom między dziurami, jamnikiem, kibicami, babcią z grzybami i rodziną dzików. |
 | **RADIO Z WOZU!** | Pytanie od dyrektora sportowego: koszulki, klasyki, przepisy, sprzęt. |
+| **BRUK! ★★★★★** | Łapanie równowagi na kocich łbach. Sektory z gwiazdkami, gładkie pobocze i kibice przy drodze. |
+| **PRZERWA NA SIKU!** | Trzymasz przycisk i puszczasz, gdy ktoś nadchodzi: motor telewizji, kamper, wycieczka szkolna, babcia z jamnikiem. Siusianie przy kibicach to kara UCI. |
+| **KARAMBOL!** | Przeskoki nad leżącym rowerem, zgubionym kołem i kłębowiskiem kolarzy. |
+| **ZJAZD! AGRAFKA** | Hamujesz przed zakrętem, nie w nim. Za szybko lądujesz w snopkach siana. |
+| **SZLABAN!** | Zatrzymujesz się przed zamkniętym przejazdem kolejowym. Kto przejedzie, dostaje dyskwalifikację (rywal właśnie ją dostał). |
+| **ŚCIANA! NA STOJĄCO!** | Pedałowanie w tańcu, na zmianę lewa i prawa, przez tunel kibiców do kapliczki na szczycie. |
+| **CZASÓWKA!** | Trzymasz moc na progu. Za mocno i bateria W′ się wyczerpuje, za lekko i brakuje sekund. |
+| **NOSIWODA!** | Łapiesz bidony rzucane z wozu technicznego i wozisz je pod koszulką. |
+| **ZMIANA KOŁA!** | Szybka sekwencja przycisków: łańcuch na najmniejszą, szybkozamykacz, koło, zacisk, pchnięcie mechanika. |
+| **PODIUM!** | Wstrząsasz szampanem i strzelasz. Za mocno i korek strąca komisarzowi kapelusz. |
 
-Po drodze trafiają się niespodzianki (wóz techniczny, kontrola skarpetek, lotna premia ×2, dzwonki krowie), a za punkty wpadają koszulki: biała, w grochy, zielona, żółta i tęczowa.
+Po drodze trafiają się niespodzianki (wóz techniczny, dzień przerwy, kontrola skarpetek, gazeta pod koszulkę na zjazd, kontrola antydopingowa, kibic w stroju kurczaka, lotna premia ×2, dzwonki krowie), a za punkty wpadają koszulki: biała, w grochy, zielona, żółta i tęczowa.
 
 ## Poziomy
 
