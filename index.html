@@ -239,6 +239,7 @@ button:focus-visible{outline:3px solid var(--mustard);outline-offset:3px}
       <li><b>Za punkty zdobywasz koszulki:</b> od czerwonej latarni aż po tęczę.</li>
     </ul>
     <p>Podpowiedzi są skromne. Kto jeździ, ten wie.</p>
+    <p>Nie słychać muzyki? Podgłośnij telefon i sprawdź ikonę głośnika u góry. Dźwięk startuje po pierwszym dotknięciu.</p>
     <button class="btn primary" id="bHelpClose">Rozumiem, jedziemy</button>
   </div>
 </div>
@@ -293,8 +294,21 @@ const PAPER=g.createPattern(PAPERC,'repeat'),GRAIN=g.createPattern(GRAINC,'repea
 const VIG=mkCanvas(300,450,(x)=>{const gr=x.createRadialGradient(150,205,70,150,225,330);gr.addColorStop(0,'rgba(40,20,8,0)');gr.addColorStop(.6,'rgba(40,20,8,.12)');gr.addColorStop(1,'rgba(30,14,6,.62)');x.fillStyle=gr;x.fillRect(0,0,300,450);});
 
 /* ---------- dźwięk ---------- */
-const AU={c:null,on:true,m:null,nb:null};
-function A(){if(!AU.on)return null;try{if(!AU.c){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;AU.c=new AC();AU.m=AU.c.createGain();AU.m.gain.value=.55;AU.m.connect(AU.c.destination);const len=AU.c.sampleRate;AU.nb=AU.c.createBuffer(1,len,AU.c.sampleRate);const d=AU.nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;}if(AU.c.state==='suspended')AU.c.resume();}catch(e){return null;}return AU.c;}
+const AU={c:null,on:true,m:null,mus:null,nb:null,el:null};
+function A(){if(!AU.on)return null;try{if(!AU.c){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;AU.c=new AC();
+    const comp=AU.c.createDynamicsCompressor();comp.threshold.value=-12;comp.knee.value=8;comp.ratio.value=5;comp.attack.value=.003;comp.release.value=.18;comp.connect(AU.c.destination);
+    AU.m=AU.c.createGain();AU.m.gain.value=1.7;AU.m.connect(comp);AU.mus=AU.c.createGain();AU.mus.gain.value=.42;AU.mus.connect(comp);
+    const len=AU.c.sampleRate;AU.nb=AU.c.createBuffer(1,len,AU.c.sampleRate);const d=AU.nb.getChannelData(0);for(let i=0;i<len;i++)d[i]=Math.random()*2-1;}
+  if(AU.c.state!=='running'&&AU.c.state!=='closed'){const r=AU.c.resume();if(r&&r.catch)r.catch(()=>{});}}catch(e){return null;}return AU.c;}
+function silentWav(){const n=2000,buf=new Uint8Array(44+n),dv=new DataView(buf.buffer),w=(o,t)=>{for(let i=0;i<t.length;i++)buf[o+i]=t.charCodeAt(i);};
+  w(0,'RIFF');dv.setUint32(4,36+n,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);dv.setUint32(24,8000,true);dv.setUint32(28,8000,true);dv.setUint16(32,1,true);dv.setUint16(34,8,true);w(36,'data');dv.setUint32(40,n,true);buf.fill(128,44);
+  let t='';for(let i=0;i<buf.length;i++)t+=String.fromCharCode(buf[i]);return'data:audio/wav;base64,'+btoa(t);}
+function unlockAudio(){if(!AU.on)return;
+  try{if(navigator.audioSession&&navigator.audioSession.type!=='playback')navigator.audioSession.type='playback';}catch(e){}
+  try{if(!AU.el){const a=document.createElement('audio');a.src=silentWav();a.loop=true;a.setAttribute('playsinline','');AU.el=a;}if(AU.el.paused){const pr=AU.el.play();if(pr&&pr.catch)pr.catch(()=>{});}}catch(e){}
+  const c=A();if(!c)return;try{const b=c.createBuffer(1,1,22050),src=c.createBufferSource();src.buffer=b;src.connect(c.destination);src.start(0);}catch(e){}
+  music.start();}
+['pointerup','touchend','click','keydown'].forEach(ev=>window.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 function osc(type,f,t0,dur,vol,f2){const c=AU.c,o=c.createOscillator(),gn=c.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+dur);gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(vol,t0+.008);gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);o.connect(gn);gn.connect(AU.m);o.start(t0);o.stop(t0+dur+.05);}
 function noise(t0,dur,vol,ft,fr,q,f2){const c=AU.c,s=c.createBufferSource();s.buffer=AU.nb;s.loop=true;const f=c.createBiquadFilter();f.type=ft;f.frequency.setValueAtTime(fr,t0);if(f2)f.frequency.exponentialRampToValueAtTime(f2,t0+dur);if(q)f.Q.value=q;const gn=c.createGain();gn.gain.setValueAtTime(.0001,t0);gn.gain.exponentialRampToValueAtTime(vol,t0+Math.min(.02,dur/4));gn.gain.exponentialRampToValueAtTime(.0001,t0+dur);s.connect(f);f.connect(gn);gn.connect(AU.m);s.start(t0,Math.random()*.5);s.stop(t0+dur+.05);}
 function play(fn){const c=A();if(!c)return;try{fn(c.currentTime);}catch(e){}}
@@ -320,6 +334,29 @@ const sfx={
   grab(){play(t=>noise(t,.12,.12,'bandpass',800,1,1900));},
   fanfare(){play(t=>{[523,659,784,1047,1319].forEach((f,i)=>osc('triangle',f,t+i*.085,.28,.11));});setTimeout(()=>sfx.bell(),420);}
 };
+
+/* ---------- muzyka: własny walc musette (3/4), akordeon i um-pa-pa ---------- */
+const MEL=[[76,1],[81,.5],[80,.5],[81,1],[84,1.5],[83,.5],[81,1],[80,1],[83,1],[76,1],[74,1],[71,1],[68,1],
+  [72,1],[76,1],[81,1],[77,1.5],[76,.5],[74,1],[76,1],[68,1],[71,1],[69,2],[0,1],
+  [79,1],[76,.5],[77,.5],[79,1],[84,2],[79,1],[77,1],[74,.5],[76,.5],[77,1],[76,2],[72,1],
+  [74,1],[77,1],[81,1],[84,1],[83,.5],[81,.5],[76,1],[80,1],[83,1],[86,1],[81,2],[0,1]];
+const CHS=['Am','Am','E7','E7','Am','Dm','E7','Am','C','C','G7','C','Dm','Am','E7','Am'];
+const CHORD={Am:[45,[57,60,64]],E7:[40,[56,59,62]],Dm:[38,[53,57,62]],C:[48,[52,55,60]],G7:[43,[53,59,62]]};
+const MELI=(()=>{const m=new Array(96).fill(null);let pos=0;for(const [n,d] of MEL){if(n)m[Math.round(pos*2)]={n,d};pos+=d;}return m;})();
+const mtof=n=>440*Math.pow(2,(n-69)/12);
+function mVoice(t,f,dur,vol,type,det,cut){const c=AU.c,o=c.createOscillator(),gn=c.createGain(),lp=c.createBiquadFilter();o.type=type;o.frequency.setValueAtTime(f,t);if(det)o.detune.setValueAtTime(det,t);lp.type='lowpass';lp.frequency.value=cut;gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(vol,t+.018);gn.gain.setValueAtTime(vol*.85,t+Math.max(.03,dur-.05));gn.gain.exponentialRampToValueAtTime(.0001,t+dur+.05);o.connect(lp);lp.connect(gn);gn.connect(AU.mus);o.start(t);o.stop(t+dur+.1);}
+const music={timer:null,next:0,hb:0,
+  start(){if(this.timer||!AU.c)return;this.next=AU.c.currentTime+.1;this.timer=setInterval(()=>this.tick(),45);},
+  bpm(){const sp=(S.mode==='play'||S.mode==='intro'||S.mode==='result')?S.speed:1;return clamp(150+(sp-1)*90,132,200);},
+  tick(){const c=AU.c;if(!c)return;if(!AU.on||S.paused||document.hidden||c.state!=='running'){this.next=c.currentTime+.1;return;}
+    if(this.next<c.currentTime-.25)this.next=c.currentTime+.05;
+    while(this.next<c.currentTime+.22){try{this.step(this.next);}catch(e){}this.next+=30/this.bpm();}},
+  step(t){const hb=this.hb,beat=hb>>1,bar=Math.floor(beat/3)%16,inBar=beat%3,sec=60/this.bpm();
+    if(hb%2===0){const [root,ch]=CHORD[CHS[bar]];
+      if(inBar===0){mVoice(t,mtof(bar%2?root+7:root),sec*.8,.5,'triangle',0,900);mVoice(t,mtof(bar%2?root+7:root)/2,sec*.6,.25,'sine',0,400);}
+      else{for(const n of ch)mVoice(t,mtof(n),sec*.32,.07,'square',0,1500);noise(t,.04,.05,'highpass',6500,.7);}}
+    const m=MELI[hb];if(m){const d=m.d*sec;mVoice(t,mtof(m.n),d*.92,.1,'sawtooth',-11,2600);mVoice(t,mtof(m.n),d*.92,.08,'sawtooth',11,2600);mVoice(t,mtof(m.n-12),d*.9,.04,'square',0,1400);}
+    this.hb=(hb+1)%96;}};
 
 /* ---------- system kończyn: kształt, grafit, ołówek ---------- */
 function curveThru(p,pts){for(let i=1;i<pts.length-1;i++){const mx=(pts[i][0]+pts[i+1][0])/2,my=(pts[i][1]+pts[i+1][1])/2;p.quadraticCurveTo(pts[i][0],pts[i][1],mx,my);}const l=pts[pts.length-1];p.lineTo(l[0],l[1]);}
@@ -1662,7 +1699,7 @@ cv.addEventListener('pointerdown',e=>{A();
 });
 const tapUp=e=>{const b=tapHeld[e.pointerId];if(b){held[b]=false;delete tapHeld[e.pointerId];}};
 cv.addEventListener('pointerup',tapUp);cv.addEventListener('pointercancel',tapUp);cv.addEventListener('lostpointercapture',tapUp);cv.addEventListener('contextmenu',e=>e.preventDefault());
-function toggleSound(){AU.on=!AU.on;$('bSound').setAttribute('aria-pressed',String(AU.on));if(AU.c){AU.on?AU.c.resume():AU.c.suspend();}store('peletonPanika.sound',AU.on?'1':'0');}
+function toggleSound(){AU.on=!AU.on;$('bSound').setAttribute('aria-pressed',String(AU.on));try{if(AU.c){AU.on?AU.c.resume():AU.c.suspend();}if(AU.el){AU.on?AU.el.play().catch(()=>{}):AU.el.pause();}}catch(e){}if(AU.on){unlockAudio();sfx.bell();}store('peletonPanika.sound',AU.on?'1':'0');}
 let helpReturn=null;
 function openHelp(){helpReturn=document.activeElement;el.help.hidden=false;if(S.mode==='play'||S.mode==='intro')pause(true);$('bHelpClose').focus();}
 function closeHelp(){el.help.hidden=true;if(helpReturn&&helpReturn.focus)helpReturn.focus();}

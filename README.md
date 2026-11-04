@@ -48,6 +48,10 @@ Po drodze trafiają się niespodzianki (wóz techniczny, dzień przerwy, kontrol
 
 Gra zapamiętuje wybrany poziom.
 
+## Dźwięk
+
+Wszystkie dźwięki i muzyka są generowane w przeglądarce, bez plików: dzwonek rowerowy, syk kapcia, terkot wolnobiegu, dzwonki krowie, gwizd pociągu, korek szampana. W tle gra własny walc musette (akordeon i um-pa-pa), który przyspiesza razem z peletonem. Dźwięk startuje po pierwszym dotknięciu ekranu. Na iPhonie gra stara się grać także przy włączonym trybie cichym.
+
 ## Sterowanie
 
 - Klawiatura: strzałki albo WASD, spacja = akcja, P = pauza, M = dźwięk.
