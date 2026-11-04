@@ -6,7 +6,11 @@ Wystarczy otworzyć `index.html` w przeglądarce. Nie trzeba niczego instalować
 
 ## Styl
 
-Malowana animacja w duchu francuskiej karykatury lat 50.: ciepła sepia, akwarelowe tła, tuszowy kontur, który lekko „drga” jak w ręcznie rysowanym filmie, ziarno taśmy i winieta. Kolarze mają drobne torsy, długie nosy i ogromne, ogolone, lśniące łydki. Rowery są dopieszczone: malowana rama w przejściu kolorów, opony z jasnym bokiem, głębokie obręcze, zębatki z zębami, przesuwający się łańcuch, owijka, buty z pokrętłem, kaski z wentylacją i połyskiem. Wszystko rysuje kod na canvasie, bez plików graficznych.
+Malowana animacja w duchu francuskiej karykatury lat 50.: ciepła sepia, akwarelowe tła, ołówkowy kontur, który lekko „drga” jak w ręcznie rysowanym filmie, cieniowanie grafitowym kreskowaniem, ziarno taśmy i winieta.
+
+Kolarze to własne postacie w tym duchu: chudy, przygarbiony tors, długa szyja, mała głowa z wielkim opadającym nosem i smutnymi oczami, ręce jak makaron i monstrualne, ogolone, lśniące uda i łydki. Epoka też się zgadza: wełniane koszulki z pasami, kolarskie czapeczki z podwiniętym daszkiem, skórzany kask „siateczkowy” u rywala, zapasowa szytka zawieszona na ramionach, stalowe ramy z chromowanymi (albo złotymi) mufami, srebrne obręcze, bidon w koszyku na kierownicy, pętla linki hamulca, noski z paskami i skórzane siodła z nitami. Kibice są groteskowi: gruby pan w berecie, chudzielec, przysadzista babcia w wielkich okularach.
+
+Wszystko rysuje kod na canvasie, bez plików graficznych.
 
 ## Etapy
 
